@@ -3,6 +3,8 @@ local utils = require("mp.utils")
 
 -- NOTE: should not be altered here, edit options in corresponding .conf file
 local opts = {
+  executable = "rofi",
+  executable_flags = "-dmenu -i -markup-rows",
   strip_cmd_at = 65,
   sort_commands_by = "priority",
   toggle_menu_binding = "t",
@@ -194,9 +196,14 @@ function mx:handler()
 end
 
 function mx:get_rofi_choice()
+  local flags = {}
+  for flag in string.gmatch(opts.executable_flags, "%S+") do
+    table.insert(flags, flag)
+  end
+
   local rofi = mp.command_native({
     name = "subprocess",
-    args = { "rofi", "-dmenu", "-i", "-markup-rows" },
+    args = { opts.executable, unpack(flags) },
     capture_stdout = true,
     playback_only = false,
     stdin_data = table.concat(self.lines, "\n"),

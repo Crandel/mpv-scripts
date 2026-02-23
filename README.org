@@ -2,7 +2,7 @@
 
 ** Table of contents :TOC:
   - [[#m-x][M-x]]
-  - [[#m-x-rofi][M-x-rofi]]
+  - [[#m-x-rofi-or-any-other-menu-utility][M-x-rofi (or any other 'menu' utility)]]
   - [[#leader][Leader]]
   - [[#shaders-rofi][Shaders-rofi]]
   - [[#chapter-list][Chapter list]]
@@ -23,13 +23,16 @@ _Setup_:
 /Note/: if you are using my ~leader~ script, you will see your leader bindings in
 M-x menu as well.
 
-** M-x-rofi
-Essentially same as the =M-x=, but instead of using =extended-menu=
-module uses external [[https://github.com/davatorium/rofi][rofi]] to display and search through commands.
+** M-x-rofi (or any other 'menu' utility)
+Essentially same as the =M-x=, but instead of using =extended-menu= module uses
+external program ([[https://github.com/davatorium/rofi][rofi]] by default) to display and search through commands.
 
 _Setup_:
 - copy =M-x-rofi.lua= to your =~~/scripts=
 - copy =./script-opts/M_x_rofi.conf= to your =~~/scripts-opts=
+
+See config, there you can redefine which executable is used and define its flags
+that get passed to it.
 
 /Note/: if you are using my ~leader~ script, you will see your leader bindings in
 M-x menu as well.
