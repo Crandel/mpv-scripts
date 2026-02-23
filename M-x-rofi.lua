@@ -1,20 +1,20 @@
-local mp = require 'mp' -- isn't actually required, mp still gonna be defined
-local utils = require 'mp.utils'
+local mp = require("mp") -- isn't actually required, mp still gonna be defined
+local utils = require("mp.utils")
 
 -- NOTE: should not be altered here, edit options in corresponding .conf file
 local opts = {
   strip_cmd_at = 65,
-  sort_commands_by = 'priority',
-  toggle_menu_binding = 't',
+  sort_commands_by = "priority",
+  toggle_menu_binding = "t",
   pause_on_open = true,
   resume_on_exit = "only-if-was-paused", -- another possible value is true
 }
 
-(require 'mp.options').read_options(opts, mp.get_script_name())
+(require("mp.options")).read_options(opts, mp.get_script_name())
 
 local mx = {
-  list = {},          -- list of all commands (tables)
-  lines = {},         -- command tables brought to pango markup strings concat with '\n'
+  list = {}, -- list of all commands (tables)
+  lines = {}, -- command tables brought to pango markup strings concat with '\n'
   was_paused = false, -- flag that indicates that vid was paused by this script
 }
 
@@ -51,7 +51,7 @@ end
 
 function mx:sort_cmd_list()
   table.sort(self.list, function(i, j)
-    if opts.sort_commands_by == 'priority' then
+    if opts.sort_commands_by == "priority" then
       return tonumber(i.priority) > tonumber(j.priority)
     end
     -- sort by command name by default
@@ -61,40 +61,38 @@ end
 
 function mx:form_lines()
   for _, v in ipairs(self.list) do
-    table.insert(self.lines, self:get_line(v))
+    table.insert(self.lines, self.get_line(v))
   end
 end
 
-function mx:get_line(v)
+function mx.get_line(v)
   local cmd = v.cmd
-  local a = ''
 
   local function escape_pango(text)
     local escapedText = text:gsub("[&<>]", {
       ["&"] = "&amp;",
       ["<"] = "&lt;",
-      [">"] = "&gt;"
+      [">"] = "&gt;",
     })
     return escapedText
   end
 
   if #cmd > opts.strip_cmd_at then
-    cmd = string.sub(cmd, 1, opts.strip_cmd_at - 3) .. '...'
+    cmd = string.sub(cmd, 1, opts.strip_cmd_at - 3) .. "..."
   end
 
-  a = cmd .. ' <b>(' .. escape_pango(v.key) .. ')</b> '
+  local a = cmd .. " <b>(" .. escape_pango(v.key) .. ")</b> "
 
   -- handle inactive keybindings
   if v.shadowed or v.priority == -1 then
-    local why_inactive = (v.priority == -1)
-        and 'inactive keybinding'
-        or 'that binding is currently shadowed by another one'
-    a = '<span alpha="50%">' .. a .. '(' .. why_inactive .. ')</span>'
+    local why_inactive = (v.priority == -1) and "inactive keybinding"
+      or "that binding is currently shadowed by another one"
+    a = '<span alpha="50%">' .. a .. "(" .. why_inactive .. ")</span>"
     return a
   end
 
   if v.comment then
-    a = a .. '<span alpha="50%">' .. v.comment .. '</span>'
+    a = a .. '<span alpha="50%">' .. v.comment .. "</span>"
   end
   return a
 end
@@ -108,8 +106,10 @@ function mx:merge_leader_bindings(le, leader_key)
   local bindings_to_append = {}
 
   local function split_with_spaces(str)
-    local result_str = ''
-    for char in str:gmatch '.' do result_str = result_str .. char .. ' ' end
+    local result_str = ""
+    for char in str:gmatch(".") do
+      result_str = result_str .. char .. " "
+    end
     -- REVIEW: needed?
     return result_str:gsub("(.-)%s*$", "%1") -- strip spaces
   end
@@ -119,7 +119,7 @@ function mx:merge_leader_bindings(le, leader_key)
     for y, b in ipairs(self.list) do
       if b.cmd:find(lb.cmd, 1, true) then
         self.list[y].priority = 13
-        self.list[y].key = leader_key .. ' ' .. split_with_spaces(lb.key)
+        self.list[y].key = leader_key .. " " .. split_with_spaces(lb.key)
         -- if it's a script binding - initially it won't have comment field
         -- but leader binding can (and should) have comment field, so we set it
         -- and if it is normal keybinding and it had it's own comment field then
@@ -133,7 +133,7 @@ function mx:merge_leader_bindings(le, leader_key)
         local binding = {}
 
         binding.priority = 13
-        binding.key = leader_key .. ' ' .. split_with_spaces(lb.key)
+        binding.key = leader_key .. " " .. split_with_spaces(lb.key)
         binding.cmd = lb.cmd
         -- if it's a script binding - initially it won't have comment field
         -- but leader binding can (and should) have comment field, so we set it
@@ -147,7 +147,9 @@ function mx:merge_leader_bindings(le, leader_key)
     ::continue1::
   end
 
-  for _, v in ipairs(bindings_to_append) do table.insert(self.list, v) end
+  for _, v in ipairs(bindings_to_append) do
+    table.insert(self.list, v)
+  end
 
   -- TODO: handle warning about not found leader kbd better
   -- for i,v in ipairs(not_found_leader_kbds) do
@@ -171,7 +173,7 @@ function mx:handler()
 
   -- NOTE: when using external tool to view list it is necessary to reopen it
   -- when command list updates to see changes
-  mp.observe_property('input-bindings', 'native', update_bindings)
+  mp.observe_property("input-bindings", "native", update_bindings)
 
   self:register_script_message()
 
@@ -180,12 +182,11 @@ function mx:handler()
     mp.command(string.match(command, "(.-)<"))
   end
 
-  self:unregister_script_message()
+  self.unregister_script_message()
 
   mp.unobserve_property(update_bindings)
 
-  if opts.resume_on_exit == true or
-      (opts.resume_on_exit == "only-if-was-paused" and self.was_paused) then
+  if opts.resume_on_exit == true or (opts.resume_on_exit == "only-if-was-paused" and self.was_paused) then
     mp.set_property_bool("pause", false)
   end
 
@@ -211,7 +212,7 @@ function mx:register_script_message()
   end)
 end
 
-function mx:unregister_script_message()
+function mx.unregister_script_message()
   mp.unregister_script_message("merge-leader-bindings")
 end
 
